@@ -1,0 +1,66 @@
+#IDA*
+import sys
+from collections import deque
+
+class Node:
+    def __init__(self, position, parent=None):
+        self.position = position
+        self.parent = parent
+        self.g = 0
+        self.h = 0
+        self.f = 0
+
+    def __eq__(self, other):
+        return self.position == other.position
+
+def heuristic(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+def ida_star_search(start, goal, grid):
+    def search(path, g, bound):
+        node = path[-1]
+        f = g + heuristic(node.position, goal)
+        if f > bound:
+            return f
+        if node.position == goal:
+            return 'FOUND'
+        min_bound = float('inf')
+        for move in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+            neighbor_pos = (node.position[0] + move[0], node.position[1] + move[1])
+            if (0 <= neighbor_pos[0] < len(grid) and 0 <= neighbor_pos[1] < len(grid[0])
+                    and grid[neighbor_pos[0]][neighbor_pos[1]] != 1):
+                neighbor_node = Node(neighbor_pos, node)
+                if neighbor_node.position not in [n.position for n in path]:
+                    path.append(neighbor_node)
+                    t = search(path, g + grid[neighbor_pos[0]][neighbor_pos[1]], bound)
+                    if t == 'FOUND':
+                        return 'FOUND'
+                    if t < min_bound:
+                        min_bound = t
+                    path.pop()
+        return min_bound
+   
+    bound = heuristic(start, goal)
+    path = [Node(start)]
+   
+    while True:
+        t = search(path, 0, bound)
+        if t == 'FOUND':
+            return [n.position for n in path]
+        if t == float('inf'):
+            return None
+        bound = t
+
+grid = [
+    [1, 1, 0, 0, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0]
+]
+
+start = (0, 2)
+goal = (3, 4)
+
+path = ida_star_search(start, goal, grid)
+print("Path found:->", path )
