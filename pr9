@@ -1,0 +1,21 @@
+def bayes_theorem():
+    
+    P_T = 3/4  # Probability that he tells the truth
+    P_not_T = 1/4  # Probability that he does not tell the truth
+    P_S = 1/6  # Prior probability that the throw is a six
+    P_not_S = 5/6  # Probability that the throw is not a six
+
+    
+    P_it_is_six_given_S = P_T  # P("it is a six" | S)
+    P_it_is_six_given_not_S = P_not_T  # P("it is a six" | not S)
+
+    # Total probability P("it is a six")
+    P_it_is_six = (P_it_is_six_given_S * P_S) + (P_it_is_six_given_not_S * P_not_S)
+
+    # Applying Bayes' theorem to find P(S | "it is a six")
+    P_S_given_it_is_six = (P_it_is_six_given_S * P_S) / P_it_is_six
+
+    return P_S_given_it_is_six
+
+result = bayes_theorem()
+print(f"The probability that it is actually a six given that he says 'it is a six' is: {result:.2f}")
