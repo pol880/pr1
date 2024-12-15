@@ -1,0 +1,44 @@
+% Facts: gender and parent relationships
+male(john).
+male(james).
+male(peter).
+male(mike).
+male(tom).
+
+female(mary).
+female(susan).
+female(lisa).
+female(anna).
+female(lucy).
+
+parent(john, james).
+parent(john, susan).
+parent(mary, james).
+parent(mary, susan).
+parent(james, mike).
+parent(james, anna).
+parent(peter, lucy).
+parent(peter, tom).
+parent(lisa, lucy).
+parent(lisa, tom).
+
+% Rules: family relationships
+father(F, C) :- male(F), parent(F, C).
+mother(M, C) :- female(M), parent(M, C).
+
+grandfather(GF, C) :- male(GF), parent(GF, P), parent(P, C).
+grandmother(GM, C) :- female(GM), parent(GM, P), parent(P, C).
+
+brother(B, S) :- male(B), parent(P, B), parent(P, S), B \= S.
+sister(Si, S) :- female(Si), parent(P, Si), parent(P, S), Si \= S.
+
+uncle(U, N) :- male(U), brother(U, P), parent(P, N).
+uncle(U, N) :- male(U), parent(GP, U), parent(GP, P), parent(P, N), U \= P.
+
+aunt(A, N) :- female(A), sister(A, P), parent(P, N).
+aunt(A, N) :- female(A), parent(GP, A), parent(GP, P), parent(P, N), A \= P.
+
+nephew(N, U) :- male(N), uncle(U, N).
+niece(N, U) :- female(N), uncle(U, N).
+
+cousin(C1, C2) :- parent(P1, C1), parent(P2, C2), (brother(P1, P2) ; sister(P1, P2)), C1 \= C2.
