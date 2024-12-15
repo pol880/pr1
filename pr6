@@ -1,0 +1,107 @@
+Puzzle
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#define MAX 10
+
+int assigned_digits[256];
+bool used_digits[10];
+
+int get_numeric_value(const char* word) {
+    int value = 0;
+    int i;
+    for (i = 0; word[i] != '\0'; i++) {
+        value = value * 10 + assigned_digits[word[i]];
+    }
+    return value;
+}
+
+bool solve_cryptarithmetic(char words[][MAX], int n, char* result_word, int index, int unique_count, char unique_chars[]) {
+
+    if (index == unique_count) {
+        int sum = 0;
+        int i;
+        for ( i = 0; i < n; i++) {
+            sum += get_numeric_value(words[i]);
+        }
+
+        return sum == get_numeric_value(result_word);
+    }
+    int digit;
+    for ( digit = 0; digit <= 9; digit++) {
+        if (!used_digits[digit]) {
+
+            assigned_digits[unique_chars[index]] = digit;
+            used_digits[digit] = true;
+
+            if (solve_cryptarithmetic(words, n, result_word, index + 1, unique_count, unique_chars)) {
+                return true;
+            }
+
+            used_digits[digit] = false;
+        }
+    }
+
+    return false;
+}
+
+int extract_unique_characters(char words[][MAX], int n, char* result_word, char* unique_chars) {
+    bool seen[256] = {false};
+
+    int j;
+    int i;
+    for (i = 0; i < n; i++) {
+        for ( j = 0; words[i][j] != '\0'; j++) {
+            if (!seen[words[i][j]]) {
+                unique_chars[strlen(unique_chars)] = words[i][j];
+                seen[words[i][j]] = true;
+            }
+        }
+    }
+
+   
+    for (i = 0; result_word[i] != '\0'; i++) {
+        if (!seen[result_word[i]]) {
+            unique_chars[strlen(unique_chars)] = result_word[i];
+            seen[result_word[i]] = true;
+        }
+    }
+
+    return strlen(unique_chars);
+}
+
+int main() {
+    int n;
+    char words[MAX][MAX];
+    char result_word[MAX];
+    char unique_chars[256] = "";
+
+    memset(assigned_digits, -1, sizeof(assigned_digits));
+    memset(used_digits, false, sizeof(used_digits));
+
+    printf("Enter the number of words: ");
+    scanf("%d", &n);
+
+    printf("Enter the words (one per line):\n");
+    int i;
+    for ( i = 0; i < n; i++) {
+        scanf("%s", words[i]);
+    }
+
+    printf("Enter the result word: ");
+    scanf("%s", result_word);
+
+    int unique_count = extract_unique_characters(words, n, result_word, unique_chars);
+
+    if (solve_cryptarithmetic(words, n, result_word, 0, unique_count, unique_chars)) {
+        printf("Solution found:\n");
+        int i;
+        for ( i = 0; i < unique_count; i++) {
+            printf("%c = %d\n", unique_chars[i], assigned_digits[unique_chars[i]]);
+        }
+    } else {
+        printf("No solution exists.\n");
+    }
+
+    return 0;
+}
