@@ -1,0 +1,11 @@
+% Define the knowledge base
+likes_shopping(X) :- woman(X).  % All women like shopping
+
+% Define specific individuals
+woman(olivia).  % Olivia is a woman
+
+% Query to check if Olivia likes shopping
+query_likes_shopping :-
+    likes_shopping(olivia) ->
+    write('Olivia likes shopping.');
+    write('Olivia does not like shopping.').
