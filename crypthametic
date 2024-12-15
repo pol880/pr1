@@ -1,0 +1,65 @@
+#include <iostream>
+#include <cstring>
+#include <vector>
+
+using namespace std;
+
+int assigned_digits[256];
+bool used_digits[10];
+
+int get_numeric_value(const string& word) {
+    int value = 0;
+    for (char c : word) value = value * 10 + assigned_digits[c];
+    return value;
+}
+
+bool solve_cryptarithmetic(const vector<string>& words, const string& result_word, int index, const vector<char>& unique_chars) {
+    if (index == unique_chars.size()) {
+        int sum = 0;
+        for (const string& word : words) sum += get_numeric_value(word);
+        return sum == get_numeric_value(result_word);
+    }
+    for (int digit = 0; digit <= 9; digit++) {
+        if (!used_digits[digit]) {
+            assigned_digits[unique_chars[index]] = digit;
+            used_digits[digit] = true;
+            if (solve_cryptarithmetic(words, result_word, index + 1, unique_chars)) return true;
+            used_digits[digit] = false;
+        }
+    }
+    return false;
+}
+
+int extract_unique_characters(const vector<string>& words, const string& result_word, vector<char>& unique_chars) {
+    bool seen[256] = {false};
+    for (const string& word : words) {
+        for (char c : word) if (!seen[c]) { unique_chars.push_back(c); seen[c] = true; }
+    }
+    for (char c : result_word) if (!seen[c]) { unique_chars.push_back(c); seen[c] = true; }
+    return unique_chars.size();
+}
+
+int main() {
+    int n;
+    cout << "Enter the number of words: ";
+    cin >> n;
+    vector<string> words(n);
+    cout << "Enter the words (one per line):\n";
+    for (int i = 0; i < n; i++) cin >> words[i];
+
+    string result_word;
+    cout << "Enter the result word: ";
+    cin >> result_word;
+
+    vector<char> unique_chars;
+    int unique_count = extract_unique_characters(words, result_word, unique_chars);
+
+    if (solve_cryptarithmetic(words, result_word, 0, unique_chars)) {
+        cout << "Solution found:\n";
+        for (char c : unique_chars) cout << c << " = " << assigned_digits[c] << endl;
+    } else {
+        cout << "No solution exists.\n";
+    }
+
+    return 0;
+}
