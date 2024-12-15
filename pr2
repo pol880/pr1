@@ -1,0 +1,103 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+#define CAPACITY1 3
+#define CAPACITY2 4
+
+struct State {
+    int jug1;
+    int jug2;
+};
+
+struct Node {
+    State state;
+    Node* parent;
+};
+
+bool isVisited(const vector<State>& visitedStates, const State& state) {
+    for (int i = 0; i < visitedStates.size(); i++) {
+        if (visitedStates[i].jug1 == state.jug1 && visitedStates[i].jug2 == state.jug2) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void printPath(Node* node) {
+    if (node == NULL) return;
+    printPath(node->parent);
+    cout << "(" << node->state.jug1 << ", " << node->state.jug2 << ")\n";
+}
+
+void bfs(const State& initialState, const State& goalState) {
+    queue<Node*> q;
+    vector<State> visitedStates;
+
+    Node* root = new Node;
+    root->state = initialState;
+    root->parent = NULL;
+    q.push(root);
+
+    while (!q.empty()) {
+        Node* currentNode = q.front();
+        q.pop();
+        State currentState = currentNode->state;
+
+        if (currentState.jug1 == goalState.jug1 && currentState.jug2 == goalState.jug2) {
+            printPath(currentNode);
+            return;
+        }
+
+        if (isVisited(visitedStates, currentState)) {
+            delete currentNode;
+            continue;
+        }
+
+        visitedStates.push_back(currentState);
+
+        vector<State> nextStates;
+        State tempState;
+
+        tempState = {CAPACITY1, currentState.jug2};
+        nextStates.push_back(tempState);
+
+        tempState = {currentState.jug1, CAPACITY2};
+        nextStates.push_back(tempState);
+
+        tempState = {0, currentState.jug2};
+        nextStates.push_back(tempState);
+
+        tempState = {currentState.jug1, 0};
+        nextStates.push_back(tempState);
+
+        tempState = {currentState.jug1 - min(currentState.jug1, CAPACITY2 - currentState.jug2),
+                     currentState.jug2 + min(currentState.jug1, CAPACITY2 - currentState.jug2)};
+        nextStates.push_back(tempState);
+
+        tempState = {currentState.jug1 + min(currentState.jug2, CAPACITY1 - currentState.jug1),
+                     currentState.jug2 - min(currentState.jug2, CAPACITY1 - currentState.jug1)};
+        nextStates.push_back(tempState);
+
+        for (int i = 0; i < nextStates.size(); i++) {
+            if (!isVisited(visitedStates, nextStates[i])) {
+                Node* newNode = new Node;
+                newNode->state = nextStates[i];
+                newNode->parent = currentNode;
+                q.push(newNode);
+            }
+        }
+    }
+
+    cout << "No solution found.\n";
+}
+
+int main() {
+    State initialState = {0, 0};
+    State goalState = {2, 0};
+
+    bfs(initialState, goalState);
+
+    return 0;
+}
