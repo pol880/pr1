@@ -1,0 +1,92 @@
+class WumpusWorld:
+    def __init__(self, grid_size, pits, wumpus, gold, agent_pos):
+        self.size = grid_size
+        self.grid = [['' for _ in range(self.size)] for _ in range(self.size)]
+        self.agent_pos = agent_pos
+        self.has_gold = False
+        self.alive = True
+        self.reward = 0
+
+        self.grid[wumpus[0]][wumpus[1]] = 'W'
+        for pit in pits:
+            self.grid[pit[0]][pit[1]] = 'P'
+        self.grid[gold[0]][gold[1]] = 'G'
+
+    def perceive(self):
+        x, y = self.agent_pos
+        if self.grid[x][y] == 'W':
+            self.alive = False
+            self.reward -= 100
+        elif self.grid[x][y] == 'P':
+            self.alive = False
+            self.reward -= 100
+        elif self.grid[x][y] == 'G':
+            self.has_gold = True
+            self.reward += 100
+
+    def move(self, direction):
+        if not self.alive:
+            return
+
+        x, y = self.agent_pos
+        if direction == 'up' and x > 0:
+            self.agent_pos = (x - 1, y)
+        elif direction == 'down' and x < self.size - 1:
+            self.agent_pos = (x + 1, y)
+        elif direction == 'left' and y > 0:
+            self.agent_pos = (x, y - 1)
+        elif direction == 'right' and y < self.size - 1:
+            self.agent_pos = (x, y + 1)
+
+        self.perceive()
+
+    def play(self):
+        print("Starting position:", self.agent_pos)
+        while self.alive:
+            if self.has_gold:
+                print("Agent has gold and is leaving the cave!")
+                self.reward += 100
+                break
+
+            if self.agent_pos == (1, 1):
+                self.move('down')
+            elif self.agent_pos == (2, 1):
+                self.move('right')
+            elif self.agent_pos == (2, 2):
+                self.move('right')
+            elif self.agent_pos == (2, 3):
+                print("Agent has found the gold!")
+                self.has_gold = True
+                break
+            elif self.agent_pos == (1, 3):
+                print("Agent is dead due to Wumpus!")
+                break
+            elif self.agent_pos == (3, 3) or self.agent_pos == (3, 1):
+                print("Agent fell into a pit!")
+                break
+            else:
+                print("Agent cannot move further!")
+                break
+
+            print(f"Agent position: {self.agent_pos}, Reward: {self.reward}")
+
+        if not self.alive:
+            print("Agent is dead!")
+
+if __name__ == "__main__":
+    grid_size = int(input("Enter grid size: "))
+
+    pits_input = input("Enter pit positions: ")
+    pits = [tuple(map(int, pit.split(','))) for pit in pits_input.split(';')]
+
+    wumpus_input = input("Enter Wumpus position: ")
+    wumpus = tuple(map(int, wumpus_input.split(',')))
+
+    gold_input = input("Enter gold position: ")
+    gold = tuple(map(int, gold_input.split(',')))
+
+    agent_input = input("Enter agent starting position: ")
+    agent_pos = tuple(map(int, agent_input.split(',')))
+
+    game = WumpusWorld(grid_size, pits, wumpus, gold, agent_pos)
+    game.play()
